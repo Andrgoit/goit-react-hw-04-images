@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ThreeDots } from 'react-loader-spinner';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,99 +10,72 @@ import LoadButton from './Button/Button';
 import Container from './App.styled';
 import { apiRequest } from '../services/api';
 
-class App extends Component {
-  state = {
-    pictures: [],
-    picture: null,
-    page: 1,
-    showModal: false,
-    name: null,
-    loading: false,
+const App = () => {
+  const [pictures, setPictures] = useState([]);
+  const [picture, setPicture] = useState(null);
+  const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [name, setName] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+
+    apiRequest(name, page)
+      .then(res => setPictures(prevState => [...pictures, ...res.hits]))
+      .finally(() => setLoading(false));
+  }, [name, page]); // я видел это подчеркивание. подсказчик хочет добавить в зависимость pictures. Но когда я его добавляю - все летит к чертям ХЗ
+
+  const closeModal = () => {
+    setShowModal(false);
   };
 
-  componentDidUpdate(_, prevState) {
-    const prevName = prevState.name;
-    const nextName = this.state.name;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
-
-    if (prevName !== nextName || prevPage !== nextPage) {
-      this.setState({ loading: true });
-      apiRequest(nextName, nextPage)
-        .then(res =>
-          this.setState(prevState => {
-            return { pictures: [...prevState.pictures, ...res.hits] };
-          })
-        )
-        .finally(() => this.setState({ loading: false }));
-      // .then(data => this.setState({ pictures: data.hits }));
-    }
-  }
-
-  closeModal = () => {
-    this.setState({ showModal: false });
+  const formSubmithandler = value => {
+    setName(value);
+    setPage(1);
+    setPictures([]);
   };
 
-  formSubmithandler = value => {
-    this.setState({
-      name: value,
-      page: 1,
-      pictures: [],
-    });
+  const loadMoreButtonHandler = () => {
+    setPage(prevState => page + 1);
   };
 
-  loadMoreButtonHandler = () => {
-    // console.log('нажатие на load more');
-    this.setState(prevState => {
-      return { page: prevState.page + 1 };
-    });
+  const choiceImageForModalWindow = newPicture => {
+    setPicture(newPicture);
+    setShowModal(true);
   };
 
-  choiceImageForModalWindow = newPicture => {
-    // console.log('newPicture', newPicture);
-    this.setState({ picture: newPicture, showModal: true });
-  };
+  return (
+    <div>
+      <ToastContainer autoClose={1000} />
 
-  render() {
-    const { loading, pictures, showModal, picture } = this.state;
+      {showModal && <Modal picture={picture} onClose={closeModal} />}
 
-    return (
-      <div>
-        <ToastContainer autoClose={1000} />
+      <SearchBar onChangeValue={formSubmithandler} />
 
-        {showModal && <Modal picture={picture} onClose={this.closeModal} />}
+      {pictures && (
+        <ImageGallery pictures={pictures} onClick={choiceImageForModalWindow}>
+          <ImageGalleryItem />
+        </ImageGallery>
+      )}
 
-        <SearchBar onChangeValue={this.formSubmithandler} />
-
-        {pictures && (
-          <ImageGallery
-            pictures={pictures}
-            onClick={this.choiceImageForModalWindow}
-          >
-            <ImageGalleryItem />
-          </ImageGallery>
+      <Container>
+        {loading ? (
+          <ThreeDots
+            height="80"
+            width="80"
+            radius="9"
+            color="#3f51b5"
+            ariaLabel="three-dots-loading"
+            wrapperStyle={{}}
+            wrapperClassName=""
+            visible={true}
+          />
+        ) : (
+          pictures.length > 0 && <LoadButton onClick={loadMoreButtonHandler} />
         )}
-
-        <Container>
-          {loading ? (
-            <ThreeDots
-              height="80"
-              width="80"
-              radius="9"
-              color="#3f51b5"
-              ariaLabel="three-dots-loading"
-              wrapperStyle={{}}
-              wrapperClassName=""
-              visible={true}
-            />
-          ) : (
-            pictures.length > 0 && (
-              <LoadButton onClick={this.loadMoreButtonHandler} />
-            )
-          )}
-        </Container>
-      </div>
-    );
-  }
-}
+      </Container>
+    </div>
+  );
+};
 export { App };
