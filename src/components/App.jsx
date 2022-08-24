@@ -24,6 +24,7 @@ const App = () => {
     apiRequest(name, page)
       .then(res => setPictures(prevState => [...pictures, ...res.hits]))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, page]); // я видел это подчеркивание. подсказчик хочет добавить в зависимость pictures. Но когда я его добавляю - все летит к чертям ХЗ
 
   const closeModal = () => {

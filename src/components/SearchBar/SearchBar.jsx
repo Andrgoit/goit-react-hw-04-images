@@ -10,16 +10,9 @@ import {
 
 const SearchBar = ({ onChangeValue }) => {
   const [value, setValue] = useState('');
-  // state = {
-  //   value: '',
-  // };
 
   const changeSearchValue = event => {
-    // console.dir(event.target);
-    // console.dir(event.currentTarget);
     setValue(event.currentTarget.value);
-    // this.setState({ value: event.currentTarget.value });
-    // console.log('21-this.state.value', this.state.value);
   };
 
   const handlerSubmit = event => {
