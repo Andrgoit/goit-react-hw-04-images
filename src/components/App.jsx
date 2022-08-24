@@ -22,10 +22,9 @@ const App = () => {
     setLoading(true);
 
     apiRequest(name, page)
-      .then(res => setPictures(prevState => [...pictures, ...res.hits]))
+      .then(res => setPictures(prevPictures => [...prevPictures, ...res.hits]))
       .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, page]); // я видел это подчеркивание. подсказчик хочет добавить в зависимость pictures. Но когда я его добавляю - все летит к чертям ХЗ
+  }, [name, page]);
 
   const closeModal = () => {
     setShowModal(false);
