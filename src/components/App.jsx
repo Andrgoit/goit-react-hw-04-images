@@ -19,11 +19,14 @@ const App = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-
-    apiRequest(name, page)
-      .then(res => setPictures(prevPictures => [...prevPictures, ...res.hits]))
-      .finally(() => setLoading(false));
+    if (name) {
+      setLoading(true);
+      apiRequest(name, page)
+        .then(res =>
+          setPictures(prevPictures => [...prevPictures, ...res.hits])
+        )
+        .finally(() => setLoading(false));
+    }
   }, [name, page]);
 
   const closeModal = () => {
